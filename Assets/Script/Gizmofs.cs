@@ -11,33 +11,36 @@ public class QuadGenerator : MonoBehaviour
     [ProgressBar(0.1f,2)]
     [SerializeField] private float m_Thikness = 0.1f;
 
-    [SerializeField] private float m_OuterRadius => m_innerRadius + m_Thikness;
+    private float m_OuterRadius => m_innerRadius + m_Thikness;
     
-    [ProgressBar(3,250)]
+    [ProgressBar(3,30)]
     [SerializeField] private int m_TotalSegments = 3;
+    [SerializeField] private int m_TotalVertexCount => m_TotalSegments * 2;
 
     private void OnDrawGizmosSelected()
     {
-        DrawWireCircle(transform.position,transform.rotation,1);
+        DrawWireCircle(transform.position,transform.rotation,m_innerRadius,m_TotalSegments);
+        DrawWireCircle(transform.position,transform.rotation,m_OuterRadius,m_TotalSegments);
     }
 
-    private void Start()
+    private const float Tan = 6.28318530718f;
+
+    public static Vector2 GetUnitVectorByAngle(float angRad)
     {
-        DrawWireCircle(transform.position,transform.rotation,1);
+        return new(
+            Mathf.Cos(angRad) ,
+            Mathf.Sin(angRad)  
+        );
     }
 
-    const float Tan = 6.28318530718f;
-    public static void DrawWireCircle(Vector3 pos, Quaternion rot, float radius,int details = 30)
+    private static void DrawWireCircle(Vector3 pos, Quaternion rot, float radius,int details = 30)
     {
         Vector3[] points3D = new Vector3[details];
         for (int i = 0; i < details; i++)
         {
             float t = i / (float)details;
             float angRad = t * Tan;
-            Vector2 points2D = new Vector2(
-                Mathf.Cos(angRad) ,
-                Mathf.Sin(angRad) 
-            );
+            Vector2 points2D = GetUnitVectorByAngle(angRad) * radius;
 
             points3D[i] = pos + rot * points2D;
         }
